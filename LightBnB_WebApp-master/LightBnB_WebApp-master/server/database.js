@@ -16,18 +16,36 @@ const pool = new Pool({
  * @param {String} email The email of the user.
  * @return {Promise<{}>} A promise to the user.
  */
+// const getUserWithEmail = function(email) {
+//   let user;
+//   for (const userId in users) {
+//     user = users[userId];
+//     if (user.email.toLowerCase() === email.toLowerCase()) {
+//       break;
+//     } else {
+//       user = null;
+//     }
+//   }
+//   return Promise.resolve(user);
+// };
+
 const getUserWithEmail = function(email) {
-  let user;
-  for (const userId in users) {
-    user = users[userId];
-    if (user.email.toLowerCase() === email.toLowerCase()) {
-      break;
-    } else {
-      user = null;
-    }
-  }
-  return Promise.resolve(user);
-}
+  
+  return pool
+    .query(`SELECT * 
+        FROM users
+        WHERE email = $1;`, [email]
+    )
+    .then((res) => {
+      
+      if (!res.rows) {
+        return null;
+      } else {
+        return res.rows[0];
+      }
+    });
+  
+};
 exports.getUserWithEmail = getUserWithEmail;
 
 /**
@@ -36,8 +54,22 @@ exports.getUserWithEmail = getUserWithEmail;
  * @return {Promise<{}>} A promise to the user.
  */
 const getUserWithId = function(id) {
-  return Promise.resolve(users[id]);
-}
+//   return Promise.resolve(users[id]);
+// }
+  return pool
+    .query(`SELECT *
+     FROM users
+     WHERE  id = $1;`, [id])
+    .then((res) => {
+      console.log(res.rows[0]);
+      if (!res.rows) {
+        return null;
+      } else {
+        return res.rows[0];
+      }
+    });
+    
+};
 exports.getUserWithId = getUserWithId;
 
 
@@ -46,12 +78,26 @@ exports.getUserWithId = getUserWithId;
  * @param {{name: string, password: string, email: string}} user
  * @return {Promise<{}>} A promise to the user.
  */
+//const addUser =  function(user) {
+// const userId = Object.keys(users).length + 1;
+// user.id = userId;
+// users[userId] = user;
+// return Promise.resolve(user);
+
 const addUser =  function(user) {
-  const userId = Object.keys(users).length + 1;
-  user.id = userId;
-  users[userId] = user;
-  return Promise.resolve(user);
-}
+  const query = {
+    text: 'INSERT INTO users(name, email, password) VALUES($1, $2, $3)',
+    values: [user.name, user.email, user.password],
+  };
+  console.log(user);
+  return pool
+    .query(query.text, query.values)
+    .then((res) => {
+      return res.rows;
+    });
+};
+
+
 exports.addUser = addUser;
 
 /// Reservations
