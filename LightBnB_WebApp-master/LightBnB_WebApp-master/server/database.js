@@ -210,30 +210,32 @@ const addProperty = function(property) {
   // property.id = propertyId;
   // properties[propertyId] = property;
   // return Promise.resolve(property);
-  const queryString = `
-  INSERT INTO properties (title, 
-    description, 
-    owner_id, 
-    cover_photo_url, 
-    thumbnail_photo_url, 
-    cost_per_night, 
-    parking_spaces, 
-    number_of_bathrooms, 
-    number_of_bedrooms, 
-    province, 
-    city, 
-    country, 
-    street, 
-    post_code) 
-  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
-  RETURNING *;
-  `;
-  const queryParams = [property.title, property.description, property.owner_id, property.cover_photo_url, property.thumbnail_photo_url, property.cost_per_night, Number(property.parking_spaces), Number(property.number_of_bathrooms), Number(property.number_of_bedrooms), property.province, property.city, property.country, property.street, property.post_code]
-
-  return pool.query(queryString, queryParams)
-    .then(res => res.rows[0])
-    .catch(err => err);
+  const params = [properties.owner_id,properties.title , properties.description , properties.thumbnail_photo_url , properties.cover_photo_url , properties.cost_per_night , properties.street , properties.city , properties.province , properties.post_code ,properties.country , properties.parking_spaces , properties.number_of_bathrooms, properties.number_of_bedrooms ];
+  
+  return pool.query(`INSERT INTO properties(owner_id, 
+    title: string,
+    description,
+    thumbnail_photo_url,
+    cover_photo_url,
+    cost_per_night,
+    street,
+    city,
+    province,
+    post_code,
+    country,
+    parking_spaces,
+    number_of_bathrooms,
+    number_of_bedrooms)
+    
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) 
+    RETURNING *;`,params)
+    
+    .then((res) => {
+      return res.rows[0];
+    })
+    .catch((err) => {
+      console.log(err.message);
+    });
 };
-
 
 exports.addProperty = addProperty;
